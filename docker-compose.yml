@@ -1,0 +1,52 @@
+version: '3.7'
+
+volumes:
+  salesdata:
+    driver: local
+  tfdata_vol:
+    driver: local
+
+
+services: 
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /etc/grafana/provisioning/dashboards/home.json
+    volumes:
+      - ./provisioning:/etc/grafana/provisioning  
+
+
+  db:
+    image: postgres
+    ports:
+      - "5432:5432"
+    container_name: sales-db  
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_USER: user1234
+      POSTGRES_DB: sales-db
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - salesdata:/var/lib/postgresql/data  
+
+  adminer:
+    image: adminer
+    container_name: adminer
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: sales-db:5432
+
+  tf:
+    # image tag isused to bind to a specific version of terraform
+    image: hashicorp/terraform:1.8.0
+    container_name: terraform
+    volumes:
+      - tfdata_vol:/tfdata
+      - ./infrastructure:/infrastructure
+    working_dir: /infrastructure
+    environment:
+      - TF_DATA_DIR=/tfdata

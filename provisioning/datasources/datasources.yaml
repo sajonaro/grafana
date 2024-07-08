@@ -1,0 +1,15 @@
+apiVersion: 1
+
+datasources:
+  - name: default
+    type: grafana-postgresql-datasource
+    uid: edr5yis40a0aod
+    url: sales-db:5432
+    user: user1234
+    secureJsonData:
+      password: password
+    jsonData:
+      sslmode: "disable"
+      database: sales-db
+
+
